@@ -1,0 +1,31 @@
+[project]
+name = "qlora-finetuning"
+version = "0.1.0"
+description = "QLoRA fine-tuning project"
+requires-python = ">=3.8"
+dependencies = [
+    "torch",
+    "transformers",
+    "peft",
+    "accelerate",
+    "datasets",
+    "scipy",
+    "scikit-learn",
+    "tqdm",
+    "wandb",
+    "jupyter",
+    "matplotlib",
+    "seaborn",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = [
+    "pytest",
+    "black",
+    "isort",
+    "flake8",
+]
