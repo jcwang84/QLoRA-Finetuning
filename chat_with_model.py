@@ -8,23 +8,25 @@ os.environ["WANDB_MODE"] = "offline"
 
 def load_fine_tuned_model():
     """Load the fine-tuned model with LoRA adapters"""
-    print("Loading fine-tuned model...")
+    print("Loading fine-tuned Gemma-3-270M model...")
     
     # Load the base model
-    base_model_name = "gpt2-medium"
+    base_model_name = "google/gemma-3-270m"
     
     # Try MPS first, fallback to CPU if there are issues
     try:
         model = AutoModelForCausalLM.from_pretrained(
             base_model_name,
-            device_map="auto"
+            device_map="auto",
+            attn_implementation="eager"  # Recommended for Gemma3 models
         )
         print("✅ Model loaded on MPS device")
     except Exception as e:
         print(f"⚠️  MPS failed, using CPU: {e}")
         model = AutoModelForCausalLM.from_pretrained(
             base_model_name,
-            device_map="cpu"
+            device_map="cpu",
+            attn_implementation="eager"
         )
         print("✅ Model loaded on CPU")
     
@@ -34,7 +36,7 @@ def load_fine_tuned_model():
         tokenizer.pad_token = tokenizer.eos_token
     
     # Load the LoRA adapters
-    model = PeftModel.from_pretrained(model, "./gpt2-medium-fine-tuned")
+    model = PeftModel.from_pretrained(model, "./gemma-3-270m-fine-tuned")
     
     print("✅ Model loaded successfully!")
     return model, tokenizer
@@ -133,16 +135,20 @@ def compare_with_original():
     fine_tuned_model, fine_tuned_tokenizer = load_fine_tuned_model()
     
     # Load original model
-    print("Loading original model...")
-    original_model = AutoModelForCausalLM.from_pretrained("gpt2", device_map="auto")
-    original_tokenizer = AutoTokenizer.from_pretrained("gpt2")
+    print("Loading original Gemma-3-270M model...")
+    original_model = AutoModelForCausalLM.from_pretrained(
+        "google/gemma-3-270m", 
+        device_map="auto",
+        attn_implementation="eager"
+    )
+    original_tokenizer = AutoTokenizer.from_pretrained("google/gemma-3-270m")
     if original_tokenizer.pad_token is None:
         original_tokenizer.pad_token = original_tokenizer.eos_token
     
     print("✅ Both models loaded!")
     
     print("\n" + "="*60)
-    print("🆚 COMPARISON: FINE-TUNED vs ORIGINAL")
+    print("🆚 COMPARISON: FINE-TUNED vs ORIGINAL GEMMA-3-270M")
     print("="*60)
     print("Type 'quit' to exit")
     print("="*60)
